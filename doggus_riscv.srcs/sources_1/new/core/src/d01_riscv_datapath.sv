@@ -64,6 +64,7 @@ module d01_riscv_datapath #(
 
 
     // --- Program Counter --- //
+    
     // Cancel transaction if we are waiting on a read and the PC needs to be corrected.
     assign if_cancel = recov_pc_wen && !if_ready;
     always_ff @(posedge clk, negedge rst_n) begin
