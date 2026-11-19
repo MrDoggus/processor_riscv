@@ -111,6 +111,8 @@ This is enough for bare-metal C and an RTOS like FreeRTOS. The GCC flag is -marc
 
 Target string: rv32imc_zicsr_zifencei_zicntr_zba_zbb_zbs. I'd stop here for an RTOS system.
 
+## Stage 2.5: Implement threading here. 
+
 ## Stage 3: systems features
 ### Extensions
 **A**: Atomics (lr/sc and amo*). Linux requires it, and multi-master buses and RTOS locks use it. You'll need a reservation mechanism and a way to hold the bus.
