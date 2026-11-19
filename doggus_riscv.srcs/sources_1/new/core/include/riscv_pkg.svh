@@ -210,9 +210,11 @@ typedef struct packed {
     opcode_t opcode;
 } jtype_t;
 
+
+
 // Instruction type
 typedef union packed {
-    logic [31:0] raw_instr;
+    logic [INSTR_W-1:0] raw_instr;
     ginstr_t gen_instr;
     rtype_t r;
     itype_t i;
@@ -221,6 +223,16 @@ typedef union packed {
     utype_t u;
     jtype_t j;
 } instr_t;
+
+localparam itype_t NOP_I = '{
+    imm: 12'b0000_0000_0000,
+    rs1: 5'b00000,
+    funct3: FUNCT3_ADDI,
+    rd: 5'b00000,
+    opcode: OP_ALUI
+};
+
+parameter instr_t INSTR_NOP = instr_t'(NOP_I);
 
 endpackage
 
