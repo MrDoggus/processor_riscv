@@ -148,66 +148,66 @@ typedef enum funct3_t {
 
 // General instruction
 typedef struct packed {
-    opcode_t opcode;
     logic [26:0] data;
+    opcode_t opcode;
 } ginstr_t;
 
 // R-type
 typedef struct packed {
-    opcode_t opcode;
-    reg_t rd;
-    funct3_t funct3;
-    reg_t rs1;
-    reg_t rs2;
     funct7_t funct7;
+    reg_t rs2;
+    reg_t rs1;
+    funct3_t funct3;
+    reg_t rd;
+    opcode_t opcode;
 } rtype_t;
 
 // I-type
 typedef struct packed {
-    opcode_t opcode;
-    reg_t rd;
-    funct3_t funct3;
-    reg_t rs1;
     logic [11:0] imm;
+    reg_t rs1;
+    funct3_t funct3;
+    reg_t rd;
+    opcode_t opcode;
 } itype_t;
 
 // S-type
 typedef struct packed {
-    opcode_t opcode;
-    logic [4:0] imm_4_0;
-    funct3_t funct3;
-    reg_t rs1;
-    reg_t rs2;
     logic [6:0] imm_11_5;
+    reg_t rs2;
+    reg_t rs1;
+    funct3_t funct3;
+    logic [4:0] imm_4_0;
+    opcode_t opcode;
 } stype_t;
 
 // B-type
 typedef struct packed {
-    opcode_t opcode;
-    logic imm_11;
-    logic [3:0] imm_4_1;
-    funct3_t funct3;
-    reg_t rs1;
-    reg_t rs2;
-    logic [5:0] imm_10_5;
     logic imm_12;
+    logic [5:0] imm_10_5;
+    reg_t rs2;
+    reg_t rs1;
+    funct3_t funct3;
+    logic [3:0] imm_4_1;
+    logic imm_11;
+    opcode_t opcode;
 } btype_t;
 
 // U-type
 typedef struct packed {
-    opcode_t opcode;
-    reg_t rd;
     logic [19:0] imm;
+    reg_t rd;
+    opcode_t opcode;
 } utype_t;
 
 // J-type
 typedef struct packed {
-    opcode_t opcode;
-    reg_t rd;
-    logic [7:0] imm_19_12;
-    logic imm_11;
-    logic [9:0] imm_10_1;
     logic imm_20;
+    logic [9:0] imm_10_1;
+    logic imm_11;
+    logic [7:0] imm_19_12;
+    reg_t rd;
+    opcode_t opcode;
 } jtype_t;
 
 // Instruction type
