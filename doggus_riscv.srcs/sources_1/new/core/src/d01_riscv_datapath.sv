@@ -24,6 +24,7 @@ module d01_riscv_datapath
     import datapath_pkg::*;
 #(
     parameter logic RV64I = 1'b1,
+    parameter logic C_EXTENSION = 1'b0,
     parameter logic [63:0] RESET_PC = 64'h00
 ) (
     input logic clk, rst_n,
@@ -33,9 +34,14 @@ module d01_riscv_datapath
     wishbone_if.master wb_dmem_if
 );
 
-    // --- Local parameters --- //
+if (C_EXTENSION == 1'b1) begin
+    $fatal("Compressed extension is not supported yet");
+end
 
+    // --- Local parameters --- //
+    
     localparam int unsigned XLEN = RV64I ? 64 : 32;
+    localparam int unsigned IALIGN = C_EXTENSION ? 16 : 32;
     
 
     // --- Signals --- //
@@ -64,7 +70,8 @@ module d01_riscv_datapath
     // --- Instruction Fetch --- //
 
     d01_instruction_fetch #(
-        .XLEN(XLEN)
+        .XLEN(XLEN),
+        .C_EXTENSION(C_EXTENSION)
     ) if_unit (
         .clk(clk),
         .rst_n(rst_n),
@@ -188,12 +195,19 @@ module d01_riscv_datapath
     // CSR 
     //   - Will be implemented in the MEM pipeline. 
     //   - CSR instructions that modify memory behavior are treated as fence instructions in decode. 
-    // EBREAK / ECALL
-    //   - Returns exception directly to the ROB? 
-    // Exceptions 
+    // EBREAK / ECALL / Traps
+    //   - Returns ebreak/ecall/ifetch traps directly to the ROB? 
     //   - Pause until all instructions in the ROB are retired.
     //   - Then execute the exception handler. 
-    //   - stvec stores the jump offset to the trap handler. 
+    //   - tvec stores the jump offset to the trap handler. 
+    //   - edeleg, ideleg stores which privilage level exceptions are delegated to (U, S, M). 
+    //   - ip stores information on pending interrupts
+    //   - ie stores interupt enable bits
+    //   - scratch is a read/write register for general use for the trap handler. Typically stores context pointer. 
+    //   - epc stores the program counter of the instruction that caused the trap.
     //   - cause stores the trap reason
+    //   - tval stores additional information about the trap. 
+
+
 
 endmodule 

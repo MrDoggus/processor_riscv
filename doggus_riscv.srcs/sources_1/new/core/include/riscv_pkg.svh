@@ -29,7 +29,7 @@ typedef enum logic [OP_W-1:0] {
     OP_BRANCH   = 7'b110_0011,  // (B) BEQ, BNE, BLT, BGE, BLTU, BGEU
     OP_JALR     = 7'b110_0111,  // (I) Jump and link register
     OP_JAL      = 7'b110_1111,  // (J) Jump and link
-    OP_SYS      = 7'b111_0011   // (I?) ECALL, EBREAK, CSR[Zicsr]
+    OP_SYS      = 7'b111_0011   // (I) ECALL, EBREAK, CSR[Zicsr]
 } opcode_t;
 
 // Load funct3

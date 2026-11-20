@@ -13,6 +13,7 @@
 // cancel_i:    Cancel current request.
 // instr_o:     Instruction output.
 // ready_o:     Instruction is ready.
+// trap_cause_o: Trap cause output.
 // 
 // Dependencies:
 // - None
@@ -27,7 +28,8 @@ module d01_instruction_fetch
     import riscv_pkg::*;
     import datapath_pkg::*;
 #(
-    parameter int unsigned XLEN = 64
+    parameter int unsigned XLEN = 64,
+    parameter logic C_EXTENSION = 1'b0
 ) (
     input logic clk, rst_n,
 
@@ -155,7 +157,10 @@ always_comb begin
     if (wb_imem_if.err) begin
         trap_cause_o = IF_TRAP_CAUSE_WISHBONE;
     end
-    else if (pc_i[1:0] != 2'b00) begin
+    else if (C_EXTENSION == 1'b0 && pc_i[1:0] != 2'b00) begin
+        trap_cause_o = IF_TRAP_CAUSE_INSTR_MISALIGN;
+    end
+    else if (C_EXTENSION == 1'b1 && pc_i[0] != 1'b0) begin
         trap_cause_o = IF_TRAP_CAUSE_INSTR_MISALIGN;
     end
 end
