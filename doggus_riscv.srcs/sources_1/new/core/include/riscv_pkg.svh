@@ -3,6 +3,10 @@
 
 package riscv_pkg;
 
+parameter int unsigned XLEN = 64;
+parameter int unsigned ADDR_W = 64;
+typedef logic [ADDR_W-1:0] addr_t;
+
 parameter INSTR_W = 32;
 parameter INSTR_BYTEW = INSTR_W / 8;
 

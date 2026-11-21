@@ -2,7 +2,7 @@
 // RISCV d01 Datapath
 // 
 // Parameters: 
-// XLEN:        Data width of the core.
+// _
 // 
 // Ports:
 // clk:         System clock input.
@@ -40,13 +40,12 @@ end
 
     // --- Local parameters --- //
     
-    localparam int unsigned XLEN = RV64I ? 64 : 32;
     localparam int unsigned IALIGN = C_EXTENSION ? 16 : 32;
     
 
     // --- Signals --- //
 
-    logic [XLEN-1:0] if_next_pc; // Next program counter.
+    addr_t if_next_pc; // Next program counter.
     logic if_req; // Next instruction request valid.
     logic if_cancel; // Next instruction request cancel.
     logic if_flush; // Flush current instruction fetch state.
@@ -59,18 +58,17 @@ end
     logic if_pipe_nop; // Latch NOP operation for next pipe stage.
 
     logic restore_pc_wen; // Restore counter write enable.
-    logic [XLEN-1:0] restore_pc; // Program counter.
+    addr_t restore_pc; // Program counter.
 
     logic if_latch_nop; // Instruction fetch latch is NOP. 
     if_trap_cause_t if_latch_trap_cause; // Trap cause during instruction fetch.
-    logic [31:0] if_latch_instr; // Instruction fetch latch is instruction.
-    logic [XLEN-1:0] if_latch_pc; // Instruction fetch latch is PC.
+    instr_t if_latch_instr; // Instruction fetch latch is instruction.
+    addr_t if_latch_pc; // Instruction fetch latch is PC.
 
 
     // --- Instruction Fetch --- //
 
     d01_instruction_fetch #(
-        .XLEN(XLEN),
         .C_EXTENSION(C_EXTENSION)
     ) if_unit (
         .clk(clk),
@@ -92,7 +90,7 @@ end
     assign if_flush = restore_pc_wen;
     always_ff @(posedge clk, negedge rst_n) begin
         if (rst_n == 1'b0) begin
-            if_pc <= (XLEN)'(RESET_PC);
+            if_pc <= (ADDR_W)'(RESET_PC);
         end
         else if (restore_pc_wen) begin
             if_pc <= restore_pc;
@@ -145,7 +143,7 @@ end
     );
 
     latch #(
-        .WIDTH(XLEN)
+        .WIDTH(ADDR_W)
     ) if_latch_pc (
         .clk(clk),
         .rst_n(rst_n),
@@ -180,6 +178,8 @@ end
     //   - fence rw,w: r,w = l_q; w,w = s_q
     //   - For loads, r,r and r,w indexes are passed to the queue for the MEM stage to handle. 
     //   - For stores, w,r and w,w indexes are passed to the queue for the MEM stage to handle. 
+    //   - If no fence instruction or all fence instructions are completed, set x,r and x,w to the latest retired index. 
+    //   - This should allow these loads/stores to retire/flush in any order when there is no fence instruction in scope. 
     // FENCE.TSO
     //   - Equivalent to fence r,rw; fence w,w
     //   - r,r = l_q, r,w = l_q, w,w = s_q

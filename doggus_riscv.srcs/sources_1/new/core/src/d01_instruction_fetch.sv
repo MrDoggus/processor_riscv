@@ -28,7 +28,6 @@ module d01_instruction_fetch
     import riscv_pkg::*;
     import datapath_pkg::*;
 #(
-    parameter int unsigned XLEN = 64,
     parameter logic C_EXTENSION = 1'b0
 ) (
     input logic clk, rst_n,
@@ -37,7 +36,7 @@ module d01_instruction_fetch
     wishbone_if.master wb_imem_if
 
     // Datapath control 
-    input logic [XLEN-1:0] pc_i,
+    input logic [ADDR_W-1:0] pc_i,
     input logic req_i,
     input logic cancel_i,
     output instr_t instr_o,
@@ -45,21 +44,21 @@ module d01_instruction_fetch
     output if_trap_cause_t trap_cause_o
 );
 
-if (wb_imem_if.DATA_W % 32 != 0) begin
-    $fatal("wb_imem_if.DATA_W must be a multiple of 32");
+if (wb_imem_if.WB_DATA_W % INSTR_W != 0) begin
+    $fatal("wb_imem_if.WB_DATA_W must be a multiple of INSTR_W");
 end
 
 
 // --- Local parameters --- //
 
-localparam int unsigned INSTR_IN_DATR = wb_imem_if.DATA_W / 32; // Number of instructions per word in the wishbone data bus.
-localparam WB_DAT_BYTEW = wb_imem_if.DATA_W / 8; // Number of bytes per word in the wishbone data bus.
+localparam int unsigned INSTR_IN_DATR = wb_imem_if.WB_DATA_W / INSTR_W; // Number of instructions per word in the wishbone data bus.
+localparam WB_DAT_BYTEW = wb_imem_if.WB_DATA_W / 8; // Number of bytes per word in the wishbone data bus.
 
 
 // --- Signals --- //
 
-logic [wb_imem_if.ADDR_W-1:0] wb_addr; // Byte address to wishbone address
-logic [wb_imem_if.ADDR_W-1:0] wb_addr_q; // Previous wishbone address.
+logic [wb_imem_if.WB_ADDR_W-1:0] wb_addr; // Byte address to wishbone address
+logic [wb_imem_if.WB_ADDR_W-1:0] wb_addr_q; // Previous wishbone address.
 
 logic req_changed; // Indicates if the request has changed since the last cycle.
 logic req_q; // Previous request state.
@@ -72,7 +71,7 @@ logic [31:0] instr_buf [$clog2(INSTR_IN_DATR)-1:0]; // Read buffer for instructi
 // --- Module Logic --- //
 
 // Previous request state register
-assign wb_addr = (wb_imem_if.ADDR_W)'(pc_i[XLEN-1:XLEN-$clog2(WB_DAT_BYTEW)]);
+assign wb_addr = (wb_imem_if.WB_ADDR_W)'(pc_i[WB_ADDR_W-1:WB_ADDR_W-$clog2(WB_DAT_BYTEW)]);
 always_ff @(posedge clk or negedge rst_n) begin
     if (rst_n == 1'b0) begin
         req_q <= 1'b0;
